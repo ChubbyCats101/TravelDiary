@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "TravelDiary",
+    "slug": "travel-diary",
+    "version": "1.0.0",
+    "scheme": "traveldiary",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.thanakorn.traveldiary"
+    },
+    "android": {
+      "package": "com.thanakorn.traveldiary"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "ถ่ายภาพเก็บความทรงจำของทริป",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "เลือกรูปสำหรับบันทึกการเดินทาง",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "ปักหมุดสถานที่เมื่อคุณกดใช้ตำแหน่งปัจจุบัน"
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "savePhotosPermission": "บันทึกภาพลงคลังภาพ",
+          "granularPermissions": [
+            "photo"
+          ]
+        }
+      ],
+      "@react-native-community/datetimepicker"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  }
+}
