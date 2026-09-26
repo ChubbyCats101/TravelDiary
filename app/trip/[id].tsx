@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
 import { Alert, Image, ScrollView, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useTrips } from '../../contexts/TripsContext';
-import AccountGate from '../../components/AccountGate';
-import VenueMap from '../../components/VenueMap';
-import { Action, Message, ui } from '../../components/JourneyUI';
+import { useTrips } from '../../src/contexts/TripsContext';
+import AccountGate from '../../src/components/AccountGate';
+import VenueMap from '../../src/components/VenueMap';
+import { Action, Message, ui } from '../../src/components/JourneyUI';
 export default function Detail() {
   const {id}=useLocalSearchParams<{id:string}>(); const {trips,loading,error,refresh,remove,save}=useTrips(); const trip=trips.find(t=>t.id===id);
   const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const lock=useRef(false);

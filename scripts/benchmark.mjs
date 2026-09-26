@@ -53,7 +53,7 @@ try {
     method: 'One sequential client; HTTP loopback; server and client in same Node process; temporary on-disk SQLite; 100 seeded trips without photos; timings include fetch and JSON parsing; nearest-rank percentiles; no mobile rendering or network latency measurement.',
     results,
   };
-  await writeFile(new URL('../PERFORMANCE_RESULTS.json', import.meta.url), JSON.stringify(report, null, 2) + '\n');
+  await writeFile(new URL('../docs/PERFORMANCE_RESULTS.json', import.meta.url), JSON.stringify(report, null, 2) + '\n');
   console.table(results.map(({ samplesMs, ...summary }) => summary));
 } finally {
   await new Promise(resolve => server.close(resolve));

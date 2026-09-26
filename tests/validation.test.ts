@@ -1,4 +1,4 @@
-import { tripErrors, isTrip } from '../types/trip';
+import { tripErrors, isTrip } from '../src/types/trip';
 import { trip } from './fixtures';
 
 it('accepts leap day and coordinate limits', () => {

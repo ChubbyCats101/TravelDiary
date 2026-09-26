@@ -60,7 +60,7 @@
     "test": "npm run test:node && npm run test:ui",
     "test:node": "node --test tests/*.test.mjs",
     "test:ui": "jest --runInBand",
-    "lint": "expo lint app components contexts hooks services types tests",
+    "lint": "expo lint app src tests",
     "doctor": "npx expo-doctor"
   },
   "private": true,

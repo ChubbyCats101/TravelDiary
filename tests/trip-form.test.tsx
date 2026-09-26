@@ -1,11 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import TripForm from '../components/TripForm';
+import TripForm from '../src/components/TripForm';
 import { trip } from './fixtures';
 
 const mockSave = jest.fn().mockResolvedValue(undefined);
-jest.mock('../contexts/TripsContext', () => ({ useTrips: () => ({ save: mockSave }) }));
-jest.mock('../components/TripPhoto', () => () => null);
-jest.mock('../components/VenueMap', () => () => null);
+jest.mock('../src/contexts/TripsContext', () => ({ useTrips: () => ({ save: mockSave }) }));
+jest.mock('../src/components/TripPhoto', () => () => null);
+jest.mock('../src/components/VenueMap', () => () => null);
 jest.mock('@react-native-community/datetimepicker', () => {
   const { View } = jest.requireActual('react-native');
   return function MockDatePicker(props: object) { return <View testID="date-picker" {...props} />; };

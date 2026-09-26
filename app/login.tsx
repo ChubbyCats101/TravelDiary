@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, Text } from 'react-native';
 import { router } from 'expo-router';
-import { useAuth } from '../contexts/AuthContext';
-import { Action, Field, Message, ui } from '../components/JourneyUI';
+import { useAuth } from '../src/contexts/AuthContext';
+import { Action, Field, Message, ui } from '../src/components/JourneyUI';
 export default function Login() {
   const { signIn } = useAuth(); const [email, setEmail] = useState(''); const [password, setPassword] = useState('');
   const [create, setCreate] = useState(false); const [error, setError] = useState(''); const [busy, setBusy] = useState(false); const lock = useRef(false);

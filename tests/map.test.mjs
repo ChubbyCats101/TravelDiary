@@ -6,7 +6,7 @@ import ts from 'typescript';
 
 test('map opens without GPS, selects by tap/drag, and preserves read-only detail maps', () => {
   const exports = {};
-  vm.runInNewContext(ts.transpileModule(readFileSync('services/venue-map-html.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText, { exports });
+  vm.runInNewContext(ts.transpileModule(readFileSync('src/services/venue-map-html.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText, { exports });
   const messages = [], mapEvents = {}, markerEvents = {};
   let mounted = false, draggable = false, zoom, center, position;
   const map = {

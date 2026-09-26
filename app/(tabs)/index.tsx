@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { FlatList, Image, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { useTrips } from '../../contexts/TripsContext';
-import AccountGate from '../../components/AccountGate';
-import { Action, Field, Message, ui } from '../../components/JourneyUI';
+import { useTrips } from '../../src/contexts/TripsContext';
+import AccountGate from '../../src/components/AccountGate';
+import { Action, Field, Message, ui } from '../../src/components/JourneyUI';
 export default function Diary() {
   const {trips,loading,error,refresh} = useTrips(); const [query,setQuery] = useState(''); const [favorites,setFavorites] = useState(false);
   const term=query.trim().toLowerCase(); const data=trips.filter(t => (!favorites||t.favorite)&&`${t.title} ${t.location.name} ${t.note}`.toLowerCase().includes(term));

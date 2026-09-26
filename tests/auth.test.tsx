@@ -2,15 +2,15 @@ import { Text } from 'react-native';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
-import { AuthProvider } from '../contexts/AuthContext';
-import AccountGate from '../components/AccountGate';
+import { AuthProvider } from '../src/contexts/AuthContext';
+import AccountGate from '../src/components/AccountGate';
 import Login from '../app/login';
-import { authenticate, verifySession, ApiError } from '../services/api';
+import { authenticate, verifySession, ApiError } from '../src/services/api';
 import { session } from './fixtures';
 
 jest.mock('expo-router', () => ({ router: { replace: jest.fn(), push: jest.fn() } }));
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn(), deleteItemAsync: jest.fn() }));
-jest.mock('../services/api', () => ({ ...jest.requireActual('../services/api'), authenticate: jest.fn(), verifySession: jest.fn() }));
+jest.mock('../src/services/api', () => ({ ...jest.requireActual('../src/services/api'), authenticate: jest.fn(), verifySession: jest.fn() }));
 
 beforeEach(() => {
   jest.mocked(SecureStore.getItemAsync).mockResolvedValue(null);

@@ -2,17 +2,17 @@ import type { PropsWithChildren } from 'react';
 import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react-native';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
-import { AuthProvider, useAuth } from '../contexts/AuthContext';
-import { TripsProvider, useTrips } from '../contexts/TripsContext';
-import { useTripForm } from '../hooks/useTripForm';
+import { AuthProvider, useAuth } from '../src/contexts/AuthContext';
+import { TripsProvider, useTrips } from '../src/contexts/TripsContext';
+import { useTripForm } from '../src/hooks/useTripForm';
 import Diary from '../app/(tabs)/index';
-import { ApiError, authenticate, listTrips, saveTrip, deleteTrip, verifySession } from '../services/api';
+import { ApiError, authenticate, listTrips, saveTrip, deleteTrip, verifySession } from '../src/services/api';
 import { session, trip } from './fixtures';
 
 jest.mock('expo-router', () => ({ router: { push: jest.fn() } }));
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn(), deleteItemAsync: jest.fn() }));
-jest.mock('../services/api', () => ({
-  ...jest.requireActual('../services/api'),
+jest.mock('../src/services/api', () => ({
+  ...jest.requireActual('../src/services/api'),
   authenticate: jest.fn(), listTrips: jest.fn(), saveTrip: jest.fn(), deleteTrip: jest.fn(), verifySession: jest.fn(),
 }));
 

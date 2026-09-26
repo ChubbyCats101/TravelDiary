@@ -1,5 +1,5 @@
-import type { Session } from '../types/event';
-import type { Trip } from '../types/trip';
+import type { Session } from '../src/types/event';
+import type { Trip } from '../src/types/trip';
 
 export const session: Session = {
   token: 'a'.repeat(64), email: 'student@example.test', expiresAt: Date.now() + 3600000,
