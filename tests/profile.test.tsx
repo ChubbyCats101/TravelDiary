@@ -1,0 +1,61 @@
+import { fireEvent, render, screen } from '@testing-library/react-native';
+import Profile from '../app/(tabs)/profile';
+import { getProfile, saveProfile } from '../src/services/api';
+import { session } from './fixtures';
+import { launchImageLibraryAsync } from 'expo-image-picker';
+import { manipulateAsync } from 'expo-image-manipulator';
+
+jest.mock('../src/contexts/AuthContext', () => ({ useAuth: () => ({ session: jest.requireActual('./fixtures').session, ready: true, error: '', signOut: jest.fn() }) }));
+jest.mock('../src/contexts/TripsContext', () => ({ useTrips: () => ({ trips: [] }) }));
+jest.mock('../src/services/api', () => ({ getProfile: jest.fn(), saveProfile: jest.fn() }));
+jest.mock('expo-image-picker', () => ({ launchImageLibraryAsync: jest.fn() }));
+jest.mock('expo-image-manipulator', () => ({ manipulateAsync: jest.fn(), SaveFormat: { JPEG: 'jpeg' } }));
+const saved = { name: 'ชื่อเดิม', bio: 'ชอบภูเขา', photo: null };
+beforeEach(() => {
+  jest.mocked(getProfile).mockReset().mockResolvedValue(saved);
+  jest.mocked(saveProfile).mockReset().mockImplementation(async profile => profile);
+});
+it('cancels a draft and saves edits using the signed-in account', async () => {
+  await render(<Profile />);
+  await fireEvent.press(await screen.findByRole('button', { name: 'แก้ไขโปรไฟล์' }));
+  await fireEvent.changeText(screen.getByLabelText('ชื่อที่แสดง'), 'ยังไม่บันทึก');
+  await fireEvent.press(screen.getByRole('button', { name: 'ยกเลิกการแก้ไข' }));
+  expect(screen.getByText('ชื่อเดิม')).toBeTruthy();
+  expect(saveProfile).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: 'แก้ไขโปรไฟล์' }));
+  await fireEvent.changeText(screen.getByLabelText('ชื่อที่แสดง'), '   ');
+  await fireEvent.press(screen.getByRole('button', { name: 'บันทึกโปรไฟล์' }));
+  expect(screen.getByLabelText('ชื่อที่แสดง').props['aria-invalid']).toBe(true);
+  expect(saveProfile).not.toHaveBeenCalled();
+  await fireEvent.changeText(screen.getByLabelText('ชื่อที่แสดง'), 'ชื่อใหม่');
+  await fireEvent.press(screen.getByRole('button', { name: 'บันทึกโปรไฟล์' }));
+  await screen.findByText('✓ บันทึกโปรไฟล์แล้ว');
+  expect(saveProfile).toHaveBeenCalledWith({ ...saved, name: 'ชื่อใหม่' }, session.token);
+});
+it('retains edits after a save failure so the user can retry', async () => {
+  jest.mocked(saveProfile).mockRejectedValueOnce(new Error('เครือข่ายขัดข้อง'));
+  await render(<Profile />);
+  await fireEvent.press(await screen.findByRole('button', { name: 'แก้ไขโปรไฟล์' }));
+  await fireEvent.changeText(screen.getByLabelText('แนะนำตัว'), 'เรื่องใหม่');
+  await fireEvent.press(screen.getByRole('button', { name: 'บันทึกโปรไฟล์' }));
+  await screen.findByText('เครือข่ายขัดข้อง');
+  expect(screen.getByLabelText('แนะนำตัว').props.value).toBe('เรื่องใหม่');
+  await fireEvent.press(screen.getByRole('button', { name: 'บันทึกโปรไฟล์' }));
+  await screen.findByText('✓ บันทึกโปรไฟล์แล้ว');
+});
+it('prepares a selected photo and can remove it before saving', async () => {
+  jest.mocked(launchImageLibraryAsync).mockResolvedValueOnce({ canceled: false, assets: [{ uri: 'file:///avatar.jpg', width: 800, height: 800 }] });
+  jest.mocked(manipulateAsync).mockResolvedValueOnce({ uri: 'file:///small.jpg', width: 512, height: 512, base64: '/9j/2Q==' });
+  await render(<Profile />);
+  await screen.findByRole('button', { name: 'แก้ไขโปรไฟล์' });
+  await fireEvent.press(screen.getByRole('button', { name: 'เปลี่ยนรูปโปรไฟล์' }));
+  await screen.findByLabelText('รูปโปรไฟล์');
+  await fireEvent.press(screen.getByRole('button', { name: 'บันทึกโปรไฟล์' }));
+  await screen.findByText('✓ บันทึกโปรไฟล์แล้ว');
+  expect(saveProfile).toHaveBeenCalledWith({ ...saved, photo: 'data:image/jpeg;base64,/9j/2Q==' }, session.token);
+  await fireEvent.press(screen.getByRole('button', { name: 'แก้ไขโปรไฟล์' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'นำรูปโปรไฟล์ออก' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'บันทึกโปรไฟล์' }));
+  await screen.findByText('✓ บันทึกโปรไฟล์แล้ว');
+  expect(saveProfile).toHaveBeenLastCalledWith(saved, session.token);
+});

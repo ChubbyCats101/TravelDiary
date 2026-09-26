@@ -16,6 +16,15 @@ test('private diary: authentication, create, retry, edit, favorite, validation, 
     assert.equal((await request('/trips')).status,401);
     const a=(await request('/auth/register','POST',{email:'a@example.test',password:'TestPassword12'})).data.token;
     const b=(await request('/auth/register','POST',{email:'b@example.test',password:'TestPassword12'})).data.token;
+    assert.equal((await request('/profile')).status,401);
+    const profile={name:'นักเดินทาง',bio:'ชอบภูเขา',photo:null};
+    assert.equal((await request('/profile','PUT',{...profile,email:'b@example.test'},a)).status,200);
+    assert.deepEqual((await request('/profile','GET',null,a)).data,profile);
+    assert.equal((await request('/profile','GET',null,b)).data.name,'นักเก็บความทรงจำ');
+    for(const change of [{name:' '},{name:'x'.repeat(61)},{bio:'x'.repeat(301)},{photo:'https://example.test/a.jpg'},{photo:'data:image/jpeg;base64,AAAA'}]) {
+      assert.equal((await request('/profile','PUT',{...profile,...change},a)).status,400);
+    }
+    assert.deepEqual((await request('/profile','GET',null,a)).data,profile);
     assert.ok(a&&b); assert.equal((await request('/auth/login','POST',{email:'a@example.test',password:'wrongpass'})).status,401);
     const draft={id:'test-trip',title:'เชียงใหม่',date:'2026-09-24',note:'ความทรงจำ',location:{name:'ดอยสุเทพ',latitude:18.8,longitude:98.9},photo:null,favorite:false};
     const created=await request('/trips/test-trip','PUT',draft,a);assert.equal(created.status,201);
@@ -41,10 +50,13 @@ test('diary and account survive an API restart in an independent database', asyn
   try{
     const account={email:'persist@example.test',password:'TestPassword12'};
     const session=await(await send('/auth/register','POST',account)).json();
+    const profile={name:'ชื่อที่เก็บไว้',bio:'ออกไปเจอโลก',photo:null};
+    assert.equal((await send('/profile','PUT',profile,session.token)).status,200);
     const draft={id:'persist-trip',title:'ทริปที่เก็บไว้',date:'2026-09-24',note:'ปิดเปิดเซิร์ฟเวอร์',location:{name:'ขอนแก่น',latitude:16.4,longitude:102.8},photo:null,favorite:false};
     assert.equal((await send('/trips/persist-trip','PUT',draft,session.token)).status,201);
     await new Promise(resolve=>server.close(resolve));server=createApi({database});server.listen(0,'127.0.0.1');await once(server,'listening');
     const login=await(await send('/auth/login','POST',account)).json();
+    assert.deepEqual(await(await send('/profile','GET',null,login.token)).json(),profile);
     const trips=await(await send('/trips','GET',null,login.token)).json();assert.equal(trips[0].title,draft.title);
   }finally{await new Promise(resolve=>server.close(resolve));await unlink(database);await rmdir(dir);}
 });

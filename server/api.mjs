@@ -14,7 +14,8 @@ export function createApi({ database = ':memory:', sessionMs = 60 * 60 * 1000 } 
   const db = new DatabaseSync(database);
   db.exec(`CREATE TABLE IF NOT EXISTS users(email TEXT PRIMARY KEY, salt TEXT NOT NULL, hash TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS sessions(hash TEXT PRIMARY KEY, email TEXT NOT NULL, expires INTEGER NOT NULL);
-    CREATE TABLE IF NOT EXISTS trips(id TEXT PRIMARY KEY, email TEXT NOT NULL, data TEXT NOT NULL);`);
+    CREATE TABLE IF NOT EXISTS trips(id TEXT PRIMARY KEY, email TEXT NOT NULL, data TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS profiles(email TEXT PRIMARY KEY, data TEXT NOT NULL);`);
   const attempts = new Map();
   const server = createServer(async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); // Demo API, bearer auth, no cookies.
@@ -58,6 +59,21 @@ export function createApi({ database = ':memory:', sessionMs = 60 * 60 * 1000 } 
       const session = db.prepare('SELECT * FROM sessions WHERE hash=?').get(digest(token));
       if (!session || session.expires <= Date.now()) fail(401, 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่');
       if (path === '/auth/me' && req.method === 'GET') return send(200, { email: session.email, expiresAt: session.expires });
+      if (path === '/profile' && req.method === 'GET') {
+        const saved = db.prepare('SELECT data FROM profiles WHERE email=?').get(session.email);
+        return send(200, saved ? JSON.parse(saved.data) : { name: 'นักเก็บความทรงจำ', bio: '', photo: null });
+      }
+      if (path === '/profile' && req.method === 'PUT') {
+        if (typeof body.name !== 'string' || !body.name.trim() || body.name.length > 60 || typeof body.bio !== 'string' || body.bio.length > 300) fail(400, 'กรอกชื่อไม่เกิน 60 ตัวอักษร และแนะนำตัวไม่เกิน 300 ตัวอักษร');
+        if (body.photo !== null) {
+          if (typeof body.photo !== 'string' || body.photo.length > 700_000 || !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(body.photo)) fail(400, 'รูปโปรไฟล์ต้องเป็น JPEG ขนาดไม่เกิน 500 KB');
+          const bytes = Buffer.from(body.photo.split(',')[1], 'base64');
+          if (bytes[0] !== 255 || bytes[1] !== 216 || bytes[2] !== 255 || bytes.at(-2) !== 255 || bytes.at(-1) !== 217) fail(400, 'เนื้อหาไฟล์ไม่ใช่ JPEG');
+        }
+        const profile = { name: body.name.trim(), bio: body.bio.trim(), photo: body.photo };
+        db.prepare('INSERT INTO profiles VALUES (?,?) ON CONFLICT(email) DO UPDATE SET data=excluded.data').run(session.email, JSON.stringify(profile));
+        return send(200, profile);
+      }
       if (path === '/auth/logout' && req.method === 'POST') { db.prepare('DELETE FROM sessions WHERE hash=?').run(digest(token)); return send(200, { ok: true }); }
       if (path === '/trips' && req.method === 'GET') return send(200, db.prepare("SELECT data FROM trips WHERE email=? ORDER BY json_extract(data, '$.date') DESC").all(session.email).map(r => JSON.parse(r.data)));
       if (path.startsWith('/trips/')) {

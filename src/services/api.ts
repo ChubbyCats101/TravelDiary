@@ -47,3 +47,15 @@ export async function saveTrip(draft: TripDraft, token: string): Promise<Trip> {
 export async function deleteTrip(id: string, token: string) {
   await request('/trips/' + encodeURIComponent(id), { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
 }
+export type UserProfile = { name: string; bio: string; photo: string | null };
+function profileResponse(data: unknown): UserProfile {
+  const p = data as UserProfile | null;
+  if (!p || typeof p.name !== 'string' || !p.name.trim() || p.name.length > 60 || typeof p.bio !== 'string' || p.bio.length > 300 || !(p.photo === null || (typeof p.photo === 'string' && p.photo.length <= 700_000 && /^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(p.photo)))) throw new Error('ข้อมูลโปรไฟล์ไม่ถูกต้อง');
+  return p;
+}
+export async function getProfile(token: string, signal?: AbortSignal): Promise<UserProfile> {
+  return profileResponse(await request('/profile', { signal, headers: { Authorization: `Bearer ${token}` } }));
+}
+export async function saveProfile(profile: UserProfile, token: string): Promise<UserProfile> {
+  return profileResponse(await request('/profile', { method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(profile) }));
+}
