@@ -1,7 +1,7 @@
 export const venueMapHtml = `<!doctype html><html><head>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<style>html,body,#map{height:100%;margin:0}body{background:#e5eee8}</style>
+<style>html,body,#map{height:100%;margin:0}body{background:#e8eff4}</style>
 </head><body><div id="map"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" onerror="window.ReactNativeWebView.postMessage(JSON.stringify({type:'script-error'}))"></script><script>
 const send = value => window.ReactNativeWebView.postMessage(JSON.stringify(value));

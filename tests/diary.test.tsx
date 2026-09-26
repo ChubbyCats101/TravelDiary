@@ -35,6 +35,17 @@ it('opens the selected diary card with its trip ID', async () => {
   await render(<Diary />, { wrapper: Providers });
   await fireEvent.press(await screen.findByRole('button', { name: 'เปิดบันทึก เชียงใหม่' }));
   expect(router.push).toHaveBeenCalledWith({ pathname: '/trip/[id]', params: { id: trip.id } });
+  expect(screen.getByText('วันนี้มีเรื่องไหนอยากจำ?')).toBeTruthy();
+  expect(screen.queryByText('เก็บวันธรรมดาและการเดินทางครั้งพิเศษไว้ในที่เดียว')).toBeNull();
+});
+
+it('welcomes an empty diary and lets the user start their first trip', async () => {
+  jest.mocked(listTrips).mockResolvedValueOnce([]);
+  await render(<Diary />, { wrapper: Providers });
+  await screen.findByText('หน้ากระดาษแรกยังว่างอยู่');
+  expect(screen.getByText('เก็บวันธรรมดาและการเดินทางครั้งพิเศษไว้ในที่เดียว')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: '＋ บันทึกการเดินทางใหม่' }));
+  expect(router.push).toHaveBeenCalledWith('/add');
 });
 
 it('filters favorite trips and searches the visible diary', async () => {
