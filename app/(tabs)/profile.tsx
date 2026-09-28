@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -93,6 +94,7 @@ function ProfileContent({ session }: { session: Session }) {
       {!!success && <Text accessibilityLiveRegion="polite" style={ui.text}>✓ {success}</Text>}
       <View style={ui.card}><Text style={ui.eyebrow}>เรื่องราวที่ผ่านมา</Text><Text style={ui.heading}>{trips.length} บันทึกการเดินทาง</Text><Text style={ui.text}>{trips.filter(t => t.favorite).length} ทริปที่ประทับใจเป็นพิเศษ</Text></View>
       <Text style={ui.muted}>โปรไฟล์และบันทึกเป็นส่วนตัว ข้อมูลที่บันทึกแล้วจะอยู่กับบัญชีของคุณ</Text>
+      <Action secondary title="การแจ้งเตือน" onPress={() => router.push('/notifications')} />
       <Action secondary title="ออกจากระบบ" disabled={busy} onPress={() => void signOut().catch(() => setMessage('ออกจากระบบไม่สำเร็จ กรุณาลองใหม่'))} />
     </ScrollView>
   </KeyboardAvoidingView>;
